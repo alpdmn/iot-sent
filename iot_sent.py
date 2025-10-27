@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 """
 iot_sent.py
 
@@ -185,7 +185,7 @@ def sonucu_yazdir(cihazlar):
         print(f"{cihaz['ip']:<18} {cihaz['mac']:<20} {cihaz['uretici']}  -->  {cihaz.get('risk_seviyesi', '')}")
 
 
-        # Telnet zaafiyeti varsa yazdır
+     
         if "telnet_varsayilan_sifre" in cihaz:
             sonuc = cihaz["telnet_varsayilan_sifre"]
             if sonuc:
@@ -269,26 +269,26 @@ def html_kaydet(dosya_adi, cihazlar):
 def risk_skoru_hesapla(cihaz):
     skor = 0
 
-    # Açık port başına 1 puan
+   
     skor += len(cihaz.get("acik_portlar", []))
 
-    # FTP anonim erişim
+   
     if cihaz.get("ftp_anon_giris"):
         skor += 5
 
-    # Telnet varsayılan şifre
+    
     if cihaz.get("telnet_varsayilan_sifre"):
         skor += 5
 
-    # HTTP varsayılan şifre
+    
     if cihaz.get("http_varsayilan_sifre"):
         skor += 5
 
-    # RTSP aktif
+    
     if cihaz.get("rtsp_aktif"):
         skor += 3
 
-    # Risk seviyesi etiketi
+    
     if skor <= 2:
         seviye = "✅ Düşük Risk"
     elif skor <= 7:
@@ -327,18 +327,18 @@ IoT Sent - IP Kamera & IoT Cihaz Keşif Aracı
 
     args = parser.parse_args()
 
-    # Pasif mod kontrolü
+    
     if args.pasif:
         pasif_dinleme(args.interface, args.sure, args.quiet)
         return
 
-    # Aktif mod - Hedef belirtilmiş mi kontrol et
+    
     if not args.target:
         print("[-] Aktif tarama için hedef IP aralığı belirtmelisiniz. -t parametresi gerekli.")
         parser.print_help()
         sys.exit(1)
 
-    # Port listesi ayrıştırma
+   
     if args.ports:
         try:
             portlar = [int(p.strip()) for p in args.ports.split(",")]
@@ -348,9 +348,9 @@ IoT Sent - IP Kamera & IoT Cihaz Keşif Aracı
     else:
         portlar = YAYGIN_PORTLAR
 
-    # 🔧 Burada cihazları buluyoruz
+    
     cihazlar = agdaki_cihazlari_bul(args.target)
-    # Çıktı
+    
     if args.json:
         print(json.dumps(cihazlar, indent=4, ensure_ascii=False))
 
@@ -360,16 +360,16 @@ IoT Sent - IP Kamera & IoT Cihaz Keşif Aracı
     if args.save_html:
         html_kaydet(args.save_html, cihazlar)
 
-    # Her cihaz için port ve servis kontrolü
+    
     for cihaz in cihazlar:
         ip = cihaz["ip"]
         acik_portlar = portlari_tara(ip, portlar, args.timeout, args.quiet)
         cihaz["acik_portlar"] = acik_portlar
 
-        # Risk skoru hesapla
+        
         risk_skoru_hesapla(cihaz)
 
-        # Diğer testler
+       
         if 21 in acik_portlar:
             cihaz["ftp_anon_giris"] = ftp_anon_giris_test(ip)
 
@@ -388,14 +388,14 @@ IoT Sent - IP Kamera & IoT Cihaz Keşif Aracı
         if 23 in acik_portlar:
             cihaz["telnet_varsayilan_sifre"] = telnet_varsayilan_sifre_test(ip)
 
-    # 🔄 JSON ve HTML çıktılarını analizden sonra al
+    
     if args.save_json:
         json_kaydet(args.save_json, cihazlar)
 
     if args.save_html:
         html_kaydet(args.save_html, cihazlar)
 
-    # Çıktı
+
     if args.json:
         print(json.dumps(cihazlar, indent=4, ensure_ascii=False))
     else:
